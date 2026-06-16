@@ -242,9 +242,29 @@ async def run_cli() -> None:
 
 
 if __name__ == "__main__":
-    if "--voice" in sys.argv:
-        # Voice shell mode
+    args = sys.argv[1:]
+
+    if "--voice" in args:
         from interfaces.voice_shell import run_voice_loop
         asyncio.run(run_voice_loop())
+
+    elif "--web" in args:
+        # Launch FastAPI web dashboard
+        print("ZEON Web Dashboard → http://localhost:8000")
+        from interfaces.web import run_web
+        asyncio.run(run_web(host="0.0.0.0", port=8000))
+
+    elif "--rich" in args:
+        # Launch the new Rich interactive terminal
+        from interfaces.cli import run_cli as rich_cli
+        asyncio.run(rich_cli())
+
+    elif "--api" in args:
+        # Headless API server only
+        print("ZEON API Server → http://0.0.0.0:8000")
+        from interfaces.web import run_web
+        asyncio.run(run_web(host="0.0.0.0", port=8000))
+
     else:
+        # Default: original interactive CLI
         asyncio.run(run_cli())
