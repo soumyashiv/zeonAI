@@ -1,5 +1,5 @@
 """
-JARVIS Voice — Text-to-Speech (TTS)
+ZEON Voice — Text-to-Speech (TTS)
 Primary: Piper TTS (offline, neural, fast on CPU, ~50ms latency)
 Fallback: pyttsx3 (system TTS, instant, lower quality)
 Supports: EN and HI voices.
@@ -27,7 +27,7 @@ VOICE_MAP = {
     "hi": "hi_IN-google-medium",
 }
 
-PIPER_MODELS_DIR = Path(cfg.jarvis_root) / "models" / "piper"
+PIPER_MODELS_DIR = Path(cfg.zeon_root) / "models" / "piper"
 
 
 class TTS:
@@ -41,9 +41,9 @@ class TTS:
 
     def _detect_backend(self) -> None:
         # Check for Piper binary
-        piper_bin = Path(cfg.jarvis_root) / "models" / "piper" / "piper.exe"
+        piper_bin = Path(cfg.zeon_root) / "models" / "piper" / "piper.exe"
         if not piper_bin.exists():
-            piper_bin = Path(cfg.jarvis_root) / "models" / "piper" / "piper"
+            piper_bin = Path(cfg.zeon_root) / "models" / "piper" / "piper"
         if piper_bin.exists():
             self._piper_bin = str(piper_bin)
             self._backend = "piper"

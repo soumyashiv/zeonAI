@@ -28,7 +28,7 @@ LLM = Language Interface
 
 In fact, if we compare:
 
-| Component            | ChatGPT-style Assistant | JARVIS-style AI |
+| Component            | ChatGPT-style Assistant | ZEON-style AI |
 | -------------------- | ----------------------- | --------------- |
 | LLM                  | ✓                       | ✓               |
 | Long-term memory     | Partial                 | ✓               |
@@ -74,7 +74,7 @@ Executive Intelligence
 Action
 ```
 
-## What JARVIS Actually Needs
+## What ZEON Actually Needs
 
 ### 1. Executive Core (Brain)
 
@@ -149,7 +149,7 @@ Together.
 
 ### 3. Learning Engine
 
-This is where most "Jarvis" projects fail.
+This is where most "Zeon" projects fail.
 
 You do NOT want:
 
@@ -335,7 +335,7 @@ Deploy If Better
 
 ---
 
-## If I Were Building JARVIS in 2026
+## If I Were Building ZEON in 2026
 
 I would use:
 
@@ -413,4 +413,4 @@ The real intelligence comes from the combination of:
 * Multi-agent collaboration
 * Continuous improvement
 
-That's much closer to a JARVIS-style AI than any single model, no matter how powerful the model is.
+That's much closer to a ZEON-style AI than any single model, no matter how powerful the model is.

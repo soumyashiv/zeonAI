@@ -1,5 +1,5 @@
 """
-JARVIS Memory Agent
+ZEON Memory Agent
 Listens for MEMORY_UPDATE events and persists knowledge across all memory types.
 Also handles memory queries from other agents.
 """

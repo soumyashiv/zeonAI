@@ -1,4 +1,4 @@
-If your goal is **"closest thing to JARVIS/FRIDAY possible with today's technology"**, then your current list is only about **25-30% of the stack**.
+If your goal is **"closest thing to ZEON/FRIDAY possible with today's technology"**, then your current list is only about **25-30% of the stack**.
 
 After researching the current agent ecosystem, I'd expand the architecture significantly. Production agent systems are increasingly built around **LangGraph, CrewAI, OpenHands, memory systems, browser-use frameworks, MCP, A2A communication, knowledge graphs, and OS-level orchestration**, rather than a single model. ([openagents.org][1])
 
@@ -351,7 +351,7 @@ Controlled self-evolution.
 
 ---
 
-### Phase 7 — JARVIS Mode
+### Phase 7 — ZEON Mode
 
 Capabilities:
 

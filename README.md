@@ -1,4 +1,4 @@
-# 🤖 Project JARVIS
+# 🤖 Project ZEON
 
 **Autonomous AI Operating System** — Local-First, Multi-Agent, Self-Improving
 
@@ -10,7 +10,7 @@
 
 ```
   ┌─────────────────────────────────────────────────────────┐
-  │                    JARVIS OS v0.1.0                     │
+  │                    ZEON OS v0.1.0                     │
   ├──────────────┬──────────────┬──────────────────────────-┤
   │  Voice Shell │   CLI / Web  │     Event Bus             │
   ├──────────────┴──────────────┴───────────────────────────┤
@@ -52,14 +52,14 @@
 # 1. Start Ollama
 ollama serve
 
-# 2. Run JARVIS CLI
+# 2. Run ZEON CLI
 python main.py
 
 # 3. Commands
-jarvis> ask What is machine learning?
-jarvis> memory stats
-jarvis> system status
-jarvis> graph test
+zeon> ask What is machine learning?
+zeon> memory stats
+zeon> system status
+zeon> graph test
 ```
 
 ## Voice Mode (Phase 4 — in progress)
@@ -71,14 +71,14 @@ pip install openwakeword webrtcvad faster-whisper
 # Start with voice enabled
 python main.py --voice
 
-# Say: "Hey JARVIS, what is the weather today?"
+# Say: "Hey ZEON, what is the weather today?"
 ```
 
 ## Register local Qwen3.5-9B model
 
 ```bash
 ollama create qwen3.5-9b -f config/Modelfile.qwen35
-# Then: JARVIS_LLM_MODEL=qwen3.5-9b in .env
+# Then: ZEON_LLM_MODEL=qwen3.5-9b in .env
 ```
 
 ## Run Tests

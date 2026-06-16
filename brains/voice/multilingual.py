@@ -1,5 +1,5 @@
 """
-JARVIS Voice — Multilingual Support
+ZEON Voice — Multilingual Support
 Detects language of transcribed text, normalises, routes to correct TTS voice.
 Supported: EN (English), HI (Hindi). Extensible to any language.
 """

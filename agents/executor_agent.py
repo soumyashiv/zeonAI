@@ -1,5 +1,5 @@
 """
-JARVIS Executor Agent
+ZEON Executor Agent
 General-purpose task executor. Runs plan steps one by one,
 handles tool calls, and reports results.
 """

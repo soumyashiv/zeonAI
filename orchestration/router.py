@@ -1,21 +1,21 @@
 """
-JARVIS Orchestration Router
+ZEON Orchestration Router
 Conditional edge logic for the LangGraph StateGraph.
 Determines which node runs next based on current state.
 """
 from __future__ import annotations
-from orchestration.state import JarvisState
+from orchestration.state import ZeonState
 from core.config import get_config
 
 cfg = get_config()
 
 
-def route_after_plan(state: JarvisState) -> str:
+def route_after_plan(state: ZeonState) -> str:
     """After planning: go to critique (always)."""
     return "critique"
 
 
-def route_after_critique(state: JarvisState) -> str:
+def route_after_critique(state: ZeonState) -> str:
     """
     After critique:
     - Score too low AND revisions remaining → revise
@@ -38,11 +38,11 @@ def route_after_critique(state: JarvisState) -> str:
     return "general_executor"
 
 
-def route_after_verify(state: JarvisState) -> str:
+def route_after_verify(state: ZeonState) -> str:
     """After verification: always learn then end."""
     return "learn"
 
 
-def route_after_learn(state: JarvisState) -> str:
+def route_after_learn(state: ZeonState) -> str:
     """After learning: update memory, then END."""
     return "update_memory"

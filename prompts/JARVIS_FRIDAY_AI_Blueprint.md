@@ -1,8 +1,8 @@
 
-# JARVIS / FRIDAY Autonomous AI System Blueprint
+# ZEON / FRIDAY Autonomous AI System Blueprint
 
 ## Vision
-Build a production-grade autonomous AI operating system inspired by JARVIS and FRIDAY.
+Build a production-grade autonomous AI operating system inspired by ZEON and FRIDAY.
 
 ## Mandatory Repositories
 - https://github.com/alibaba/page-agent
@@ -152,7 +152,7 @@ Benchmarks
 Automated Evaluation
 
 ## Phase 7
-JARVIS Mode:
+ZEON Mode:
 Persistent memory
 Research
 Voice
@@ -164,7 +164,7 @@ Software engineering
 
 # Master Build Prompt
 
-Create a production-grade autonomous AI operating system inspired by JARVIS and FRIDAY.
+Create a production-grade autonomous AI operating system inspired by ZEON and FRIDAY.
 
 Requirements:
 - Persistent AI identity

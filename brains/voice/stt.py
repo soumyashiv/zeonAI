@@ -1,5 +1,5 @@
 """
-JARVIS Voice — Speech-to-Text (STT)
+ZEON Voice — Speech-to-Text (STT)
 Primary: faster-whisper (CTranslate2 — CPU-optimised, 4x faster than openai-whisper)
 Fallback: vosk (if faster-whisper unavailable)
 Supports: EN, HI, and auto-detection.
@@ -59,7 +59,7 @@ class STT:
     def _try_vosk(self) -> None:
         try:
             from vosk import Model as VoskModel, KaldiRecognizer
-            model_dir = Path(cfg.jarvis_root) / "models" / "vosk-model-en"
+            model_dir = Path(cfg.zeon_root) / "models" / "vosk-model-en"
             if not model_dir.exists():
                 log.warning("stt.vosk_model_missing", path=str(model_dir))
                 self._backend = "none"

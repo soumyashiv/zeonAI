@@ -1,5 +1,5 @@
 """
-JARVIS Research Agent
+ZEON Research Agent
 Performs multi-step web research: search → fetch → summarise → store.
 Uses DuckDuckGo (zero cost) + Crawl4AI fallback.
 """

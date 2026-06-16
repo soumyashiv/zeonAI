@@ -1,5 +1,5 @@
 """
-JARVIS Voice — Voice Activity Detection (VAD)
+ZEON Voice — Voice Activity Detection (VAD)
 Records from microphone until speech ends.
 Primary: webrtcvad (fast, rule-based, no model)
 Fallback: energy-threshold silence detection

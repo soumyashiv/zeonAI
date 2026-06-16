@@ -1,5 +1,5 @@
 """
-JARVIS — Autonomous AI Operating System
+ZEON — Autonomous AI Operating System
 Main entry point. Initializes all subsystems and starts the runtime.
 """
 from __future__ import annotations
@@ -18,7 +18,7 @@ structlog.configure(
     ]
 )
 
-log = structlog.get_logger("jarvis.main")
+log = structlog.get_logger("zeon.main")
 
 BANNER = """
 ╔══════════════════════════════════════════════════════════╗
@@ -30,13 +30,13 @@ BANNER = """
 
 
 async def startup() -> dict:
-    """Initialize all JARVIS subsystems. Returns handles dict."""
+    """Initialize all ZEON subsystems. Returns handles dict."""
     from core.config import get_config
     from core.event_bus import get_bus
     from core.audit_log import AuditLog
 
     cfg = get_config()
-    log.info("jarvis.starting", env=cfg.jarvis_env, model=cfg.llm_model)
+    log.info("zeon.starting", env=cfg.zeon_env, model=cfg.llm_model)
 
     # 1. Audit log (SQLite)
     await AuditLog.init()
@@ -70,35 +70,35 @@ async def startup() -> dict:
         try:
             await agent.start()
         except Exception as e:
-            log.warning(f"jarvis.agent_start_failed", agent=name, error=str(e))
+            log.warning(f"zeon.agent_start_failed", agent=name, error=str(e))
 
     # 5. LangGraph (optional — needs langgraph installed)
     graph = None
     try:
-        from orchestration.graph import get_jarvis_graph
-        graph = get_jarvis_graph()
+        from orchestration.graph import get_zeon_graph
+        graph = get_zeon_graph()
         if graph:
-            log.info("jarvis.graph_ready", nodes=10)
+            log.info("zeon.graph_ready", nodes=10)
     except Exception as e:
-        log.warning("jarvis.graph_unavailable", error=str(e))
+        log.warning("zeon.graph_unavailable", error=str(e))
 
     # 6. LLM backend check
     try:
         from core.llm import get_llm
         llm = await get_llm()
         healthy = await llm.health_check()
-        log.info("jarvis.llm", model=cfg.llm_model, healthy=healthy)
+        log.info("zeon.llm", model=cfg.llm_model, healthy=healthy)
     except Exception as e:
-        log.warning("jarvis.llm_unavailable", error=str(e))
+        log.warning("zeon.llm_unavailable", error=str(e))
         llm = None
 
-    log.info("jarvis.ready")
+    log.info("zeon.ready")
     return {"bus": bus, "agents": agents, "graph": graph, "mem": mem, "llm": llm}
 
 
 async def shutdown(handles: dict) -> None:
     from core.audit_log import AuditLog
-    log.info("jarvis.shutdown")
+    log.info("zeon.shutdown")
     for agent in handles.get("agents", {}).values():
         try:
             await agent.stop()
@@ -106,7 +106,7 @@ async def shutdown(handles: dict) -> None:
             pass
     await handles["bus"].stop()
     await AuditLog.close()
-    log.info("jarvis.stopped")
+    log.info("zeon.stopped")
 
 
 async def run_cli() -> None:
@@ -129,7 +129,7 @@ async def run_cli() -> None:
     while True:
         try:
             raw = await loop.run_in_executor(
-                None, lambda: input("  jarvis> ").strip()
+                None, lambda: input("  zeon> ").strip()
             )
         except EOFError:
             break
@@ -191,7 +191,7 @@ async def run_cli() -> None:
                 continue
 
             if graph:
-                print(f"  [JARVIS] Thinking...\n")
+                print(f"  [ZEON] Thinking...\n")
                 try:
                     from orchestration.graph import run_task
                     result = await run_task(query)
@@ -199,7 +199,7 @@ async def run_cli() -> None:
                     score = result.get("critique_score", "?")
                     steps = result.get("result", {})
 
-                    print(f"  ┌─ JARVIS Response (Score: {score}/10, Verified: {verified})")
+                    print(f"  ┌─ ZEON Response (Score: {score}/10, Verified: {verified})")
                     if isinstance(steps, dict) and steps.get("results"):
                         for r in steps["results"]:
                             print(f"  │  Step {r.get('step','?')}: {str(r.get('output',''))[:200]}")
@@ -214,7 +214,7 @@ async def run_cli() -> None:
                 try:
                     from core.llm import chat
                     response = await chat([{"role": "user", "content": query}])
-                    print(f"\n  [JARVIS] {response}\n")
+                    print(f"\n  [ZEON] {response}\n")
                 except Exception as e:
                     print(f"  ✗ LLM Error: {e}\n")
                     print("  Start Ollama with: ollama serve")
@@ -222,19 +222,19 @@ async def run_cli() -> None:
         else:
             # Treat anything else as an implicit ask
             if graph:
-                print(f"  [JARVIS] Processing...\n")
+                print(f"  [ZEON] Processing...\n")
                 try:
                     from orchestration.graph import run_task
                     result = await run_task(raw)
                     steps = result.get("result", {})
-                    print(f"  [JARVIS] {str(steps)[:400]}\n")
+                    print(f"  [ZEON] {str(steps)[:400]}\n")
                 except Exception as e:
                     print(f"  ✗ Error: {e}")
             else:
                 try:
                     from core.llm import chat
                     response = await chat([{"role": "user", "content": raw}])
-                    print(f"\n  [JARVIS] {response}\n")
+                    print(f"\n  [ZEON] {response}\n")
                 except Exception as e:
                     print(f"  ✗ {e}")
 

@@ -1,5 +1,5 @@
 """
-JARVIS Search Tool
+ZEON Search Tool
 DuckDuckGo search (zero cost, no API key) + Crawl4AI web extraction.
 """
 from __future__ import annotations

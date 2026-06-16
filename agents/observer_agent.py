@@ -1,5 +1,5 @@
 """
-JARVIS Observer Agent
+ZEON Observer Agent
 Monitors system health, detects anomalies, and reports on agent activity.
 Runs a background heartbeat loop to keep all agents alive.
 """

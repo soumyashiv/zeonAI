@@ -1,5 +1,5 @@
 """
-JARVIS Orchestration State
+ZEON Orchestration State
 The shared state object that flows through all LangGraph nodes.
 """
 from __future__ import annotations
@@ -8,7 +8,7 @@ from typing import Any, TypedDict, Annotated
 import operator
 
 
-class JarvisState(TypedDict, total=False):
+class ZeonState(TypedDict, total=False):
     # ── Task ───────────────────────────────────────────────────────
     task_id: str
     task: str                           # original user request

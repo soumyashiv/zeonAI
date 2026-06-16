@@ -1,5 +1,5 @@
 """
-JARVIS Memory Brain — Unified API
+ZEON Memory Brain — Unified API
 Single entry point for all 5 memory types.
 All agents call this instead of individual memory modules.
 """
@@ -20,7 +20,7 @@ log = structlog.get_logger(__name__)
 
 class MemoryBrain:
     """
-    Unified facade for all JARVIS memory systems.
+    Unified facade for all ZEON memory systems.
 
     Memory types:
         working     — Fast, ephemeral session context (Redis/in-memory)

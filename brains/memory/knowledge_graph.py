@@ -48,7 +48,7 @@ class NetworkXGraph:
         import json
 
         self._G = nx.DiGraph()
-        self._persist_path = Path(cfg.jarvis_root) / "data" / "knowledge_graph.json"
+        self._persist_path = Path(cfg.zeon_root) / "data" / "knowledge_graph.json"
         self._persist_path.parent.mkdir(parents=True, exist_ok=True)
         self._load()
         log.info("knowledge_graph.backend", backend="networkx-in-process")

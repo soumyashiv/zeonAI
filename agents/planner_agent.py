@@ -1,5 +1,5 @@
 """
-JARVIS Planner Agent
+ZEON Planner Agent
 Converts a high-level task into a concrete, ordered step graph.
 Uses LLM to decompose goals. Outputs machine-readable task steps.
 """
@@ -17,7 +17,7 @@ from brains.memory import get_memory_brain
 
 log = structlog.get_logger(__name__)
 
-PLANNER_PROMPT = """You are JARVIS's Planner Agent.
+PLANNER_PROMPT = """You are ZEON's Planner Agent.
 Your job: decompose a task into clear, ordered, executable steps.
 
 Rules:

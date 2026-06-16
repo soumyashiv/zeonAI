@@ -245,7 +245,7 @@ async def test_procedural_memory_usage_tracking(tmp_path, monkeypatch):
 
 @pytest.mark.asyncio
 async def test_knowledge_graph_add_and_retrieve(tmp_path, monkeypatch):
-    monkeypatch.setenv("JARVIS_ROOT", str(tmp_path))
+    monkeypatch.setenv("ZEON_ROOT", str(tmp_path))
     from core import config as cfg_mod
     cfg_mod.get_config.cache_clear()
 
@@ -274,7 +274,7 @@ async def test_knowledge_graph_add_and_retrieve(tmp_path, monkeypatch):
 
 @pytest.mark.asyncio
 async def test_knowledge_graph_relation(tmp_path, monkeypatch):
-    monkeypatch.setenv("JARVIS_ROOT", str(tmp_path))
+    monkeypatch.setenv("ZEON_ROOT", str(tmp_path))
     from core import config as cfg_mod
     cfg_mod.get_config.cache_clear()
 

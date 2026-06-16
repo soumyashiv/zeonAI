@@ -1,5 +1,5 @@
 """
-JARVIS Audit Log
+ZEON Audit Log
 Every action taken by any agent is recorded here.
 SQLite-backed, async-safe, with reversibility snapshots.
 """

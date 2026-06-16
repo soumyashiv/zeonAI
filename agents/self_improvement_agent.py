@@ -1,5 +1,5 @@
 """
-JARVIS Self-Improvement Agent
+ZEON Self-Improvement Agent
 Monitors performance, proposes improvements, and applies them with approval.
 Phase 7 — fully operational after Phase 3-6 are mature.
 """
@@ -18,7 +18,7 @@ from brains.memory import get_memory_brain
 
 log = structlog.get_logger(__name__)
 
-ANALYSER_PROMPT = """You are JARVIS's Self-Improvement Analyst.
+ANALYSER_PROMPT = """You are ZEON's Self-Improvement Analyst.
 Analyse the performance data and propose ONE targeted improvement.
 
 Improvement types:

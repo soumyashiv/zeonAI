@@ -1,5 +1,5 @@
 """
-JARVIS Coder Agent
+ZEON Coder Agent
 Writes, reviews, runs, and debugs Python code autonomously.
 Uses LLM to generate code, then executes it in a sandboxed subprocess.
 """
@@ -20,7 +20,7 @@ from core.audit_log import AuditLog, ActionType
 
 log = structlog.get_logger(__name__)
 
-CODER_PROMPT = """You are JARVIS's Coder Agent.
+CODER_PROMPT = """You are ZEON's Coder Agent.
 Write clean, working Python 3.11+ code to solve the task.
 Rules:
 - Only output the code block, nothing else

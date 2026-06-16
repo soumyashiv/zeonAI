@@ -14,7 +14,7 @@ from core.security_gateway import get_gateway, RiskLevel
 
 def test_config_loads():
     cfg = get_config()
-    assert cfg.jarvis_env == "development"
+    assert cfg.zeon_env == "development"
     assert cfg.dev_auto_approve is True
     assert cfg.llm_model  # model name is set (value may vary by .env)
 
@@ -27,7 +27,7 @@ def test_config_voice_languages():
 
 
 def test_config_sqlite_path_creates_dir(tmp_path, monkeypatch):
-    monkeypatch.setenv("SQLITE_PATH", str(tmp_path / "sub" / "jarvis.db"))
+    monkeypatch.setenv("SQLITE_PATH", str(tmp_path / "sub" / "zeon.db"))
     from core import config as cfg_mod
     cfg_mod.get_config.cache_clear()
     cfg = cfg_mod.get_config()

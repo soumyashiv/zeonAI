@@ -88,7 +88,7 @@ def test_multilingual_router_route_hindi():
 def test_multilingual_router_route_english():
     from brains.voice.multilingual import MultilingualRouter
     router = MultilingualRouter()
-    result = router.route("Hello JARVIS, what is the time?")
+    result = router.route("Hello ZEON, what is the time?")
     assert result["language"] == "en"
     assert len(result["sentences"]) >= 1
 
@@ -151,14 +151,14 @@ async def test_stt_faster_whisper_mocked():
     mock_info.language = "en"
     mock_info.language_probability = 0.99
     mock_segment = MagicMock()
-    mock_segment.text = " Hello JARVIS"
+    mock_segment.text = " Hello ZEON"
     mock_model.transcribe = MagicMock(return_value=(iter([mock_segment]), mock_info))
     stt._model = mock_model
 
     seg = AudioSegment(data=b"\x00" * 3200, sample_rate=16000, duration_ms=100)
     result = await stt.transcribe(seg)
 
-    assert result["text"] == "Hello JARVIS"
+    assert result["text"] == "Hello ZEON"
     assert result["language"] == "en"
     assert result["confidence"] == 0.99
 

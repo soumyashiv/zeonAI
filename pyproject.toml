@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "setuptools-scm"]
 build-backend = "setuptools.backends.legacy:build"
 
 [project]
-name = "jarvis"
+name = "zeon"
 version = "0.1.0"
-description = "Project JARVIS — Autonomous AI Operating System"
+description = "Project ZEON — Autonomous AI Operating System"
 requires-python = ">=3.11"
 readme = "README.md"
 
@@ -90,7 +90,7 @@ dev = [
 ]
 
 [project.scripts]
-jarvis = "interfaces.cli:app"
+zeon = "interfaces.cli:app"
 
 [tool.setuptools.packages.find]
 where = ["."]

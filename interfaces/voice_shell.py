@@ -1,5 +1,5 @@
 """
-JARVIS Voice Shell
+ZEON Voice Shell
 Full voice interaction loop:
   Wake Word → VAD → STT → LangGraph → TTS → (repeat)
 
@@ -17,7 +17,7 @@ from core.config import get_config
 from core.event_bus import get_bus, MessageType
 from brains.voice import get_voice_brain
 
-log = structlog.get_logger("jarvis.voice_shell")
+log = structlog.get_logger("zeon.voice_shell")
 cfg = get_config()
 
 
@@ -55,7 +55,7 @@ class VoiceShell:
             self._state = VoiceState.LISTENING
             asyncio.ensure_future(self._handle_utterance())
         elif self._state == VoiceState.SPEAKING:
-            # Interrupt JARVIS mid-speech
+            # Interrupt ZEON mid-speech
             log.info("voice_shell.interrupted")
             self._state = VoiceState.INTERRUPTED
             self._interrupt_event.set()
@@ -144,7 +144,7 @@ class VoiceShell:
                 from core.llm import chat
                 messages = [
                     {"role": "system", "content":
-                     "You are JARVIS. Answer concisely in 1-3 sentences. "
+                     "You are ZEON. Answer concisely in 1-3 sentences. "
                      f"Language: {language}"},
                     {"role": "user", "content": text},
                 ]
@@ -158,7 +158,7 @@ class VoiceShell:
     async def start(self) -> None:
         if not cfg.voice_enabled:
             log.warning("voice_shell.disabled",
-                        hint="Set JARVIS_VOICE_ENABLED=true in .env")
+                        hint="Set ZEON_VOICE_ENABLED=true in .env")
             return
 
         log.info("voice_shell.starting", wake_word=cfg.wake_word)
@@ -169,7 +169,7 @@ class VoiceShell:
         detector.start(loop)
 
         await self._voice.speak(
-            f"JARVIS online. Say '{cfg.wake_word}' to activate."
+            f"ZEON online. Say '{cfg.wake_word}' to activate."
         )
         log.info("voice_shell.ready")
 

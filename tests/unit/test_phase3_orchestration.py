@@ -21,9 +21,9 @@ def test_langgraph_importable():
         pytest.skip("langgraph not installed")
 
 
-def test_jarvis_state_structure():
-    from orchestration.state import JarvisState
-    state: JarvisState = {
+def test_zeon_state_structure():
+    from orchestration.state import ZeonState
+    state: ZeonState = {
         "task_id": "abc",
         "task": "what is 2+2?",
         "agent_origin": "user",
@@ -283,8 +283,8 @@ async def test_critic_reject(mock_chat):
 
 def test_graph_builds():
     try:
-        from orchestration.graph import build_jarvis_graph
-        graph = build_jarvis_graph()
+        from orchestration.graph import build_zeon_graph
+        graph = build_zeon_graph()
         assert graph is not None
     except ImportError:
         pytest.skip("langgraph not installed")

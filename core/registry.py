@@ -1,5 +1,5 @@
 """
-JARVIS Plugin Registry
+ZEON Plugin Registry
 Central registry for all Brain modules and Agents.
 Supports dynamic registration, discovery, and health-checking.
 """

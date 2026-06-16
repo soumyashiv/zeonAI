@@ -1,7 +1,7 @@
 """
 Procedural Memory — Skills registry backed by SQLite.
 Stores reusable skills: Python callables, prompts, or workflow templates
-that JARVIS has compiled from successful episode patterns.
+that ZEON has compiled from successful episode patterns.
 """
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ cfg = get_config()
 
 class ProceduralMemory:
     """
-    Manages JARVIS skills — reusable, compiled procedures learned from experience.
+    Manages ZEON skills — reusable, compiled procedures learned from experience.
     Skills are stored in SQLite and optionally as Python files in skills_registry/.
     """
 

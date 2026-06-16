@@ -1,5 +1,5 @@
 """
-JARVIS Base Agent
+ZEON Base Agent
 All agents inherit from this class. Provides event bus integration,
 audit logging, security gateway access, and the 10-step reasoning loop.
 """
@@ -24,7 +24,7 @@ cfg = get_config()
 
 class BaseAgent(ABC):
     """
-    Abstract base for all JARVIS agents.
+    Abstract base for all ZEON agents.
 
     Subclasses must implement `handle_task()`.
     The 10-step reasoning loop is wired in `process_message()`.

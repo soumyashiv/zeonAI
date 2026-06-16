@@ -1,5 +1,5 @@
 """
-JARVIS LLM Backend
+ZEON LLM Backend
 Unified interface for local LLM inference.
 Supports: Ollama (primary) and llama-cpp-python (fallback).
 Primary model: Qwen3.5-9B-Q6_K via Ollama.
@@ -222,7 +222,7 @@ async def get_llm() -> LLMBackend:
 
     raise RuntimeError(
         "No LLM backend available. "
-        "Start Ollama (`ollama serve`) or set JARVIS_GGUF_PATH in .env"
+        "Start Ollama (`ollama serve`) or set ZEON_GGUF_PATH in .env"
     )
 
 

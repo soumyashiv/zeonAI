@@ -1,8 +1,8 @@
-# Build Project JARVIS - Autonomous AI Operating System (Zero Budget)
+# Build Project ZEON - Autonomous AI Operating System (Zero Budget)
 
 You are a senior AI architect and engineer.
 
-Your task is to build an autonomous AI operating system inspired by JARVIS and FRIDAY.
+Your task is to build an autonomous AI operating system inspired by ZEON and FRIDAY.
 
 This is NOT a chatbot.
 
@@ -613,7 +613,7 @@ Long-Term Planning
 
 Phase 7
 
-JARVIS Mode
+ZEON Mode
 
 Persistent AI Entity
 

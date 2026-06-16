@@ -86,10 +86,10 @@ class SimpleVectorStore:
 
 class QdrantStore:
     COLLECTIONS = [
-        "jarvis_semantic",
-        "jarvis_episodic",
-        "jarvis_skills",
-        "jarvis_web_cache",
+        "zeon_semantic",
+        "zeon_episodic",
+        "zeon_skills",
+        "zeon_web_cache",
     ]
 
     def __init__(self) -> None:
@@ -118,7 +118,7 @@ class QdrantStore:
         entry_id: str,
         vector: list[float],
         payload: dict,
-        collection: str = "jarvis_semantic",
+        collection: str = "zeon_semantic",
     ) -> None:
         from qdrant_client.models import PointStruct
         self._client.upsert(
@@ -130,7 +130,7 @@ class QdrantStore:
         self,
         query_vector: list[float],
         limit: int = 5,
-        collection: str = "jarvis_semantic",
+        collection: str = "zeon_semantic",
     ) -> list[SemanticEntry]:
         results = self._client.search(
             collection_name=collection,
@@ -148,7 +148,7 @@ class QdrantStore:
         ]
 
     async def delete(
-        self, entry_id: str, collection: str = "jarvis_semantic"
+        self, entry_id: str, collection: str = "zeon_semantic"
     ) -> None:
         from qdrant_client.models import PointIdsList
         self._client.delete(
@@ -200,7 +200,7 @@ class SemanticMemory:
         text: str,
         *,
         metadata: dict | None = None,
-        collection: str = "jarvis_semantic",
+        collection: str = "zeon_semantic",
         entry_id: str | None = None,
     ) -> str:
         eid = entry_id or str(uuid.uuid4())
@@ -217,14 +217,14 @@ class SemanticMemory:
         query: str,
         *,
         limit: int = 5,
-        collection: str = "jarvis_semantic",
+        collection: str = "zeon_semantic",
     ) -> list[SemanticEntry]:
         vector = await self._embed(query)
         if isinstance(self._store, QdrantStore):
             return await self._store.search(vector, limit=limit, collection=collection)
         return await self._store.search(vector, limit=limit)
 
-    async def delete(self, entry_id: str, collection: str = "jarvis_semantic") -> None:
+    async def delete(self, entry_id: str, collection: str = "zeon_semantic") -> None:
         if isinstance(self._store, QdrantStore):
             await self._store.delete(entry_id, collection=collection)
         else:

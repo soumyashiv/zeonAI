@@ -1,5 +1,5 @@
 """
-JARVIS Executive Agent
+ZEON Executive Agent
 Top-level reasoning agent. Has final authority over all other agents.
 Responsibilities:
   - Parse user goal into structured task
@@ -20,7 +20,7 @@ from brains.memory import get_memory_brain
 
 log = structlog.get_logger(__name__)
 
-SYSTEM_PROMPT = """You are JARVIS, an autonomous AI operating system.
+SYSTEM_PROMPT = """You are ZEON, an autonomous AI operating system.
 You are the Executive Agent — the highest-authority decision maker.
 
 Your responsibilities:

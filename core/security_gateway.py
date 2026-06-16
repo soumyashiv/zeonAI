@@ -1,6 +1,6 @@
 """
-JARVIS Security Gateway
-HITL approval system. In dev mode with JARVIS_DEV_AUTO_APPROVE=true,
+ZEON Security Gateway
+HITL approval system. In dev mode with ZEON_DEV_AUTO_APPROVE=true,
 all actions are auto-approved. In production, destructive actions
 require explicit human confirmation.
 """
@@ -135,7 +135,7 @@ class SecurityGateway:
         answer = await loop.run_in_executor(
             None,
             lambda: input(
-                f"\n⚠ JARVIS ACTION APPROVAL REQUIRED\n"
+                f"\n⚠ ZEON ACTION APPROVAL REQUIRED\n"
                 f"  Agent  : {req.agent}\n"
                 f"  Action : {req.action_type} [{req.risk_level.value.upper()}]\n"
                 f"  Detail : {req.detail}\n"

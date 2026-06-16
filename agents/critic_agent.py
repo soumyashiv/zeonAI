@@ -1,5 +1,5 @@
 """
-JARVIS Critic Agent
+ZEON Critic Agent
 Evaluates plans and results. Provides structured feedback with scores.
 Challenges bad decisions. Champions quality.
 """
@@ -16,7 +16,7 @@ from core.llm import chat
 
 log = structlog.get_logger(__name__)
 
-CRITIC_PROMPT = """You are JARVIS's Critic Agent — a rigorous quality evaluator.
+CRITIC_PROMPT = """You are ZEON's Critic Agent — a rigorous quality evaluator.
 Evaluate the provided plan or result against these criteria:
 
 1. CLARITY      — Is the goal clear and unambiguous? (0-10)

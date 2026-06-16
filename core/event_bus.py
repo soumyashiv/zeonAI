@@ -1,5 +1,5 @@
 """
-JARVIS Event Bus
+ZEON Event Bus
 Async message broker for all inter-agent communication.
 Falls back to in-process asyncio queue when Redis is unavailable.
 """

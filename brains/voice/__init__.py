@@ -1,5 +1,5 @@
 """
-JARVIS Voice Brain — Unified Voice API
+ZEON Voice Brain — Unified Voice API
 Facade combining wake word, VAD, STT, TTS, and multilingual routing.
 """
 from __future__ import annotations

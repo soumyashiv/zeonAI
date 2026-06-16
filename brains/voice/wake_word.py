@@ -1,6 +1,6 @@
 """
-JARVIS Voice — Wake Word Detection
-Uses openWakeWord for "hey jarvis" detection.
+ZEON Voice — Wake Word Detection
+Uses openWakeWord for "hey zeon" detection.
 Falls back to a simple energy-threshold trigger when openWakeWord unavailable.
 """
 from __future__ import annotations
@@ -41,7 +41,7 @@ class WakeWordDetector:
         try:
             from openwakeword.model import Model
             self._model = Model(
-                wakeword_models=["hey_jarvis"],
+                wakeword_models=["hey_zeon"],
                 inference_framework="onnx",
             )
             self._backend = "openwakeword"

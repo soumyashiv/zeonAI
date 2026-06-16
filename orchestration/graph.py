@@ -1,5 +1,5 @@
 """
-JARVIS LangGraph Orchestration
+ZEON LangGraph Orchestration
 The main StateGraph that implements the 10-step reasoning loop
 as a directed graph. Nodes call agent methods. Edges use router logic.
 """
@@ -12,7 +12,7 @@ from typing import Any
 
 import structlog
 
-from orchestration.state import JarvisState
+from orchestration.state import ZeonState
 from orchestration.router import route_after_critique, route_after_plan
 
 log = structlog.get_logger(__name__)
@@ -23,7 +23,7 @@ log = structlog.get_logger(__name__)
 # Each node receives state, returns partial state update.
 # ─────────────────────────────────────────────────────────────────────────────
 
-async def node_observe(state: JarvisState) -> dict:
+async def node_observe(state: ZeonState) -> dict:
     """Step 1: Gather context from memory."""
     from brains.memory import get_memory_brain
     mem = get_memory_brain()
@@ -38,7 +38,7 @@ async def node_observe(state: JarvisState) -> dict:
     }
 
 
-async def node_understand(state: JarvisState) -> dict:
+async def node_understand(state: ZeonState) -> dict:
     """Step 2: Parse goal and identify constraints."""
     from core.llm import chat
     task = state.get("task", "")
@@ -78,7 +78,7 @@ async def node_understand(state: JarvisState) -> dict:
     }
 
 
-async def node_research(state: JarvisState) -> dict:
+async def node_research(state: ZeonState) -> dict:
     """Step 3: Fill knowledge gaps (only if requires_research)."""
     if not state.get("requires_research"):
         return {"knowledge": {}}
@@ -93,7 +93,7 @@ async def node_research(state: JarvisState) -> dict:
         return {"knowledge": {"error": str(e)}}
 
 
-async def node_plan(state: JarvisState) -> dict:
+async def node_plan(state: ZeonState) -> dict:
     """Step 4: Create step-by-step plan."""
     from core.llm import chat
     task = state.get("task", "")
@@ -133,7 +133,7 @@ async def node_plan(state: JarvisState) -> dict:
     return {"plan": plan, "revision_count": state.get("revision_count", 0)}
 
 
-async def node_critique(state: JarvisState) -> dict:
+async def node_critique(state: ZeonState) -> dict:
     """Step 5: Evaluate the plan."""
     from agents.critic_agent import CriticAgent
     critic = CriticAgent()
@@ -153,7 +153,7 @@ async def node_critique(state: JarvisState) -> dict:
     }
 
 
-async def node_revise(state: JarvisState) -> dict:
+async def node_revise(state: ZeonState) -> dict:
     """Step 6: Revise plan based on critique."""
     from core.llm import chat
     plan = state.get("plan", {})
@@ -180,7 +180,7 @@ async def node_revise(state: JarvisState) -> dict:
     }
 
 
-async def node_execute(state: JarvisState) -> dict:
+async def node_execute(state: ZeonState) -> dict:
     """Step 7: Execute the plan steps."""
     from agents.executor_agent import ExecutorAgent
 
@@ -215,7 +215,7 @@ async def node_execute(state: JarvisState) -> dict:
     }
 
 
-async def node_verify(state: JarvisState) -> dict:
+async def node_verify(state: ZeonState) -> dict:
     """Step 8: Verify result matches expectations."""
     result = state.get("result", {})
     plan = state.get("plan", {})
@@ -235,7 +235,7 @@ async def node_verify(state: JarvisState) -> dict:
     return {"verified": verified, "verify_notes": notes}
 
 
-async def node_learn(state: JarvisState) -> dict:
+async def node_learn(state: ZeonState) -> dict:
     """Step 9: Extract lessons and compile skills."""
     from core.audit_log import AuditLog
     task = state.get("task", "")
@@ -243,7 +243,7 @@ async def node_learn(state: JarvisState) -> dict:
     verified = state.get("verified", False)
 
     await AuditLog.save_episode(
-        agent="jarvis_graph",
+        agent="zeon_graph",
         task_description=task,
         action_taken=json.dumps(state.get("plan", {}).get("steps", []))[:300],
         result=str(result)[:300],
@@ -253,7 +253,7 @@ async def node_learn(state: JarvisState) -> dict:
     return {}
 
 
-async def node_update_memory(state: JarvisState) -> dict:
+async def node_update_memory(state: ZeonState) -> dict:
     """Step 10: Update semantic and graph memory."""
     from brains.memory import get_memory_brain
     mem = get_memory_brain()
@@ -272,8 +272,8 @@ async def node_update_memory(state: JarvisState) -> dict:
 # Graph builder
 # ─────────────────────────────────────────────────────────────────────────────
 
-def build_jarvis_graph():
-    """Build and return the compiled JARVIS reasoning graph."""
+def build_zeon_graph():
+    """Build and return the compiled ZEON reasoning graph."""
     try:
         from langgraph.graph import StateGraph, END
     except ImportError:
@@ -283,7 +283,7 @@ def build_jarvis_graph():
     from core.config import get_config
     cfg = get_config()
 
-    builder = StateGraph(JarvisState)
+    builder = StateGraph(ZeonState)
 
     # Add all 10 reasoning nodes
     builder.add_node("observe",        node_observe)
@@ -331,20 +331,20 @@ def build_jarvis_graph():
 _graph = None
 
 
-def get_jarvis_graph():
+def get_zeon_graph():
     global _graph
     if _graph is None:
-        _graph = build_jarvis_graph()
+        _graph = build_zeon_graph()
     return _graph
 
 
-async def run_task(task: str, agent_origin: str = "user") -> JarvisState:
-    """Run a single task through the full JARVIS reasoning loop."""
-    graph = get_jarvis_graph()
+async def run_task(task: str, agent_origin: str = "user") -> ZeonState:
+    """Run a single task through the full ZEON reasoning loop."""
+    graph = get_zeon_graph()
     if graph is None:
         raise RuntimeError("LangGraph not available. Install langgraph.")
 
-    initial_state: JarvisState = {
+    initial_state: ZeonState = {
         "task_id": str(uuid.uuid4()),
         "task": task,
         "agent_origin": agent_origin,
@@ -356,10 +356,10 @@ async def run_task(task: str, agent_origin: str = "user") -> JarvisState:
         "requires_computer_control": False,
     }
 
-    log.info("jarvis_graph.run_start", task=task[:80])
+    log.info("zeon_graph.run_start", task=task[:80])
     final_state = await graph.ainvoke(initial_state)
     log.info(
-        "jarvis_graph.run_complete",
+        "zeon_graph.run_complete",
         verified=final_state.get("verified"),
         score=final_state.get("critique_score"),
     )
