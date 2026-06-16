@@ -1,0 +1,615 @@
+# Project JARVIS — Complete Architecture & Implementation Plan
+
+> **Status:** Pre-Implementation Planning  
+> **Version:** 1.0  
+> **Date:** 2026-06-16  
+> **Architect:** Antigravity (Principal Engineer)
+
+---
+
+## 1. Executive Summary
+
+Project JARVIS is a **local-first, autonomous AI operating system** — not a chatbot. It is a persistent cognitive entity with multi-agent collaboration, long-term memory, computer control, voice interaction, self-improvement, and an eventual proprietary foundation model (MYTHOS). This document covers all planning deliverables before a single line of production code is written.
+
+---
+
+## 2. Contradictions & Issues Found in Specification
+
+> [!CAUTION]
+> These must be resolved before implementation begins.
+
+| # | Issue | Resolution |
+|---|-------|-----------|
+| 1 | **DESi** is not a Python AI library — it's the Dark Energy Spectroscopic Instrument. The spec likely refers to a research multi-agent framework. | Treat DESi as a placeholder; use **OpenHands** or a custom agentic discovery framework instead. |
+| 2 | **MiroFish** is a swarm-simulation/prediction engine, not a memory or orchestration tool. It has a narrow use-case (social prediction). | Use MiroFish only for simulation/scenario testing. Remove from core runtime. |
+| 3 | **Page-Agent** (Alibaba) is a browser-embedded copilot SDK, not a general agent framework. | Use Page-Agent for web UI control only; not as an agent backbone. |
+| 4 | **OpenMythos** is a research-only RDT implementation, not production-ready. | Use as inspiration/reference for MYTHOS architecture only. |
+| 5 | "Zero-cost" + Neo4j + Qdrant simultaneously: Neo4j Community is free; Qdrant is fully open-source. Both can run locally. | Use Neo4j Community + Qdrant self-hosted. ✅ |
+| 6 | TinyGrad vs PyTorch: TinyGrad lacks ecosystem maturity for production training pipelines. | Use **PyTorch** for MYTHOS training; TinyGrad for experimental prototypes only. |
+| 7 | "Controlled self-improvement" + "branch→test→benchmark→verify→merge" implies git-based workflow for prompt/workflow changes. | Implement a `JarvisGit` abstraction layer over standard git. |
+| 8 | Whisper.cpp cannot reliably serve as a wake-word engine (latency, efficiency). | Use **openWakeWord** for wake-word detection, Whisper.cpp for STT only. |
+| 9 | Specifying 11 "brains" and 10 "agents" separately creates ambiguity — brains ≈ capability modules, agents = active reasoning entities. | Brains = service modules. Agents = LangGraph nodes that USE brain services. |
+| 10 | "MYTHOS must not be the system" — but MYTHOS is the LLM backbone. | MYTHOS slot is pluggable. System uses Ollama/llama.cpp in early phases. |
+
+---
+
+## 3. Missing Components Identified
+
+- **Authentication/Security layer** for agent actions (no agent should execute OS commands without approval)
+- **Audit log / action ledger** — every action must be traceable
+- **Plugin/Skill registry** — how new capabilities are added at runtime
+- **Human-in-the-loop (HITL) gateway** — approval flow for destructive actions
+- **Observability stack** — metrics, tracing, health dashboards
+- **Sandboxed execution environment** — for Coder Brain to safely run generated code
+- **Configuration management** — how modules discover each other
+- **Graceful degradation** — what happens when a brain/agent fails
+
+---
+
+## 4. Full System Architecture
+
+### 4.1 Layered Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    JARVIS OS SHELL                       │
+│          (CLI / Web UI / Voice Interface)                │
+└──────────────────────┬──────────────────────────────────┘
+                       │ Events / Commands
+┌──────────────────────▼──────────────────────────────────┐
+│              EXECUTIVE LAYER (LangGraph)                 │
+│   ExecutiveAgent → Planner → Critic → Dispatcher        │
+└──────────────────────┬──────────────────────────────────┘
+                       │ Task Routing
+┌──────────────────────▼──────────────────────────────────┐
+│                  AGENT COUNCIL                           │
+│  Research│Memory│Coder│Security│Observer│Executor│Learn  │
+└────┬─────┴──┬────┴──┬──┴───┬────┴───┬─────┴──┬────┴──┬──┘
+     │        │       │      │        │         │       │
+┌────▼────────▼───────▼──────▼────────▼─────────▼───────▼──┐
+│                   BRAIN SERVICE LAYER                      │
+│  Research│Memory│Coding│Security│Observer│Voice│Learning  │
+└────┬─────┴──┬────┴──┬──┴───┬────┴───┬─────┴──┬────┴──┬──┘
+     │        │       │      │        │         │       │
+┌────▼────────▼───────▼──────▼────────▼─────────▼───────▼──┐
+│                 INFRASTRUCTURE LAYER                       │
+│   Qdrant │ Neo4j │ SQLite │ Redis │ Filesystem │ Ollama   │
+└─────────────────────────────────────────────────────────-─┘
+```
+
+### 4.2 Brain Modules (Service Layer)
+
+| Brain | Responsibility | Core Libraries |
+|-------|---------------|----------------|
+| **Executive Brain** | Goal decomposition, authority, final decisions | LangGraph, Ollama |
+| **Research Brain** | Web search, document analysis, fact gathering | Crawl4AI, Page-Agent, DuckDuckGo API |
+| **Memory Brain** | All memory types, retrieval, consolidation | Qdrant, Neo4j, SQLite |
+| **Learning Brain** | Skill acquisition, pattern recognition, feedback | PyTorch, SentencePiece |
+| **Computer Brain** | OS control, file ops, app launching | PyAutoGUI, subprocess, watchdog |
+| **Voice Brain** | STT, TTS, wake word, streaming conversation | openWakeWord, Whisper.cpp, MisoTTS |
+| **Coding Brain** | Code generation, review, execution, testing | OpenHands, subprocess sandbox |
+| **Security Brain** | Action validation, threat assessment, audit | custom rule engine |
+| **Planner Brain** | Task graphs, scheduling, dependency resolution | LangGraph, networkx |
+| **Critic Brain** | Quality evaluation, self-critique, revision | LangGraph conditional edges |
+| **Observer Brain** | System monitoring, anomaly detection, logging | psutil, structlog |
+
+### 4.3 Agent Roles (Active Reasoning Entities)
+
+Each agent is a **LangGraph StateGraph node** that calls Brain services:
+
+```python
+# Agent message protocol
+class AgentMessage(TypedDict):
+    id: str                    # UUID
+    from_agent: str            # Sender name
+    to_agent: str              # Recipient name / "broadcast"
+    message_type: str          # "task"|"result"|"critique"|"veto"|"inform"
+    payload: dict              # Task/result data
+    priority: int              # 1-10
+    requires_approval: bool    # HITL flag
+    timestamp: str
+    parent_task_id: str | None
+```
+
+---
+
+## 5. Memory Architecture
+
+### 5.1 Five Memory Types
+
+```
+┌─────────────────────────────────────────────────────┐
+│                 MEMORY BRAIN                         │
+│                                                      │
+│  ┌─────────────┐  ┌──────────────┐                  │
+│  │  Working    │  │  Episodic    │                   │
+│  │  Memory     │  │  Memory      │                   │
+│  │  (Redis /   │  │  (SQLite +   │                   │
+│  │  in-memory) │  │  Qdrant)     │                   │
+│  └─────────────┘  └──────────────┘                  │
+│                                                      │
+│  ┌─────────────┐  ┌──────────────┐  ┌────────────┐  │
+│  │  Semantic   │  │  Procedural  │  │ Knowledge  │  │
+│  │  Memory     │  │  Memory      │  │   Graph    │  │
+│  │  (Qdrant    │  │  (SQLite     │  │  (Neo4j)   │  │
+│  │  vectors)   │  │  workflows)  │  │            │  │
+│  └─────────────┘  └──────────────┘  └────────────┘  │
+└─────────────────────────────────────────────────────┘
+```
+
+### 5.2 Database Schemas
+
+**SQLite — episodic_memory**
+```sql
+CREATE TABLE episodes (
+    id TEXT PRIMARY KEY,
+    timestamp TEXT NOT NULL,
+    agent TEXT NOT NULL,
+    task_description TEXT,
+    action_taken TEXT,
+    result TEXT,
+    success INTEGER,
+    importance_score REAL,
+    embedding_id TEXT  -- links to Qdrant
+);
+
+CREATE TABLE skills (
+    id TEXT PRIMARY KEY,
+    name TEXT UNIQUE NOT NULL,
+    description TEXT,
+    code TEXT,  -- Python callable
+    trigger_pattern TEXT,
+    success_rate REAL,
+    usage_count INTEGER,
+    created_at TEXT,
+    last_used TEXT
+);
+
+CREATE TABLE audit_log (
+    id TEXT PRIMARY KEY,
+    timestamp TEXT NOT NULL,
+    agent TEXT NOT NULL,
+    action_type TEXT NOT NULL,
+    action_detail TEXT,
+    approved_by TEXT,  -- human / executive_agent
+    reversible INTEGER,
+    reversal_data TEXT  -- JSON snapshot for undo
+);
+```
+
+**Neo4j — Knowledge Graph Schema**
+```cypher
+// Entities
+(:Concept {id, name, description, confidence})
+(:Entity {id, name, type, source})
+(:Skill {id, name, trigger, code_ref})
+(:Goal {id, description, status, priority})
+(:Experience {id, timestamp, summary, embedding_id})
+
+// Relationships
+(e:Experience)-[:USED]->(s:Skill)
+(e:Experience)-[:ACHIEVED]->(g:Goal)
+(c1:Concept)-[:RELATES_TO {weight}]->(c2:Concept)
+(c:Concept)-[:DERIVED_FROM]->(e:Experience)
+(g:Goal)-[:DEPENDS_ON]->(g2:Goal)
+```
+
+**Qdrant Collections**
+```
+- jarvis_semantic     : general knowledge embeddings
+- jarvis_episodic     : episode summary embeddings
+- jarvis_skills       : skill description embeddings
+- jarvis_web_cache    : cached research embeddings
+```
+
+---
+
+## 6. Agent Communication Protocol
+
+All agents communicate via an **Event Bus** (asyncio Queue + Redis pub/sub for persistence):
+
+```
+TASK_CREATED     → Executive dispatches to relevant agent
+TASK_ACCEPTED    → Agent acknowledges
+TASK_PROGRESS    → Streaming updates
+TASK_RESULT      → Agent returns outcome
+CRITIQUE_REQUEST → Critic Brain reviews a result
+CRITIQUE_DONE    → Critique returned with score + suggestions
+VETO_RAISED      → Security Brain blocks an action
+APPROVAL_NEEDED  → HITL gateway pauses for human
+APPROVAL_GRANTED / APPROVAL_DENIED
+MEMORY_UPDATE    → Memory Brain persists new knowledge
+SKILL_LEARNED    → New skill registered
+SELF_IMPROVE_PR  → Self-improvement proposal (branch created)
+```
+
+---
+
+## 7. Reasoning Loop (Per Agent)
+
+Every non-trivial action follows:
+
+```
+1. OBSERVE    → gather context from Memory Brain + environment
+2. UNDERSTAND → parse goal, identify constraints, check history
+3. RESEARCH   → if gap in knowledge, invoke Research Brain
+4. PLAN       → create step-by-step task graph (Planner Brain)
+5. CRITIQUE   → Critic Brain evaluates plan (score ≥ 7/10 to proceed)
+6. REVISE     → if score < 7, revise and re-critique (max 3 loops)
+7. EXECUTE    → with Security Brain approval if action is destructive
+8. VERIFY     → Observer Brain checks outcome vs expectation
+9. LEARN      → Memory Brain stores episode; Learning Brain extracts patterns
+10. UPDATE    → Knowledge Graph updated with new facts/skills
+```
+
+---
+
+## 8. Voice System Architecture
+
+```
+Microphone
+    │
+    ▼
+openWakeWord ("hey jarvis")
+    │ wake detected
+    ▼
+Silero VAD (voice activity detection)
+    │ speech segment
+    ▼
+Whisper.cpp (pywhispercpp binding)
+    │ transcribed text
+    ▼
+Executive Agent (text command)
+    │ response text
+    ▼
+MisoTTS (8B expressive TTS)
+    │ audio stream
+    ▼
+Speaker output
+```
+
+Interrupt handling: new wake-word detection cancels current TTS and re-enters STT.
+
+---
+
+## 9. Computer Control Architecture
+
+```python
+class ComputerBrain:
+    def read_file(path) -> str
+    def write_file(path, content) -> AuditedResult
+    def execute_shell(cmd, sandbox=True) -> ProcessResult
+    def open_application(app_name) -> bool
+    def browser_control(instruction) -> PlaywrightResult  # via Page-Agent
+    def take_screenshot() -> Image
+    def monitor_process(pid) -> ProcessStats
+    def create_project(template, path) -> ProjectResult
+```
+
+All write/execute operations:
+1. Security Brain validates intent
+2. Audit log entry created (pre-action)
+3. Reversibility snapshot taken (where possible)
+4. Action executed
+5. Audit log updated (post-action with result)
+
+---
+
+## 10. Self-Improvement Architecture
+
+```
+Improvement Proposal
+        │
+        ▼
+ JarvisGit.create_branch("improve/prompt-v2")
+        │
+        ▼
+ Modify prompt/workflow/skill in branch
+        │
+        ▼
+ Run benchmark suite (automated tests)
+        │
+ pass? ─────────────────► Merge to main
+        │ fail
+        ▼
+ Archive branch + log failure reason
+```
+
+**Protected from self-modification:**
+- Security Brain rules
+- Audit system
+- HITL gateway
+- Core Executive authority logic
+
+---
+
+## 11. MYTHOS Foundation Model — Phased Plan
+
+> System remains functional without MYTHOS. It uses Ollama (Llama 3 / Mistral) as the default LLM backend.
+
+| Phase | Milestone | Description |
+|-------|-----------|-------------|
+| M-1 | Tokenizer | SentencePiece BPE tokenizer trained on domain corpus |
+| M-2 | Mini Transformer | 125M param decoder-only GPT in PyTorch |
+| M-3 | Training Pipeline | DataLoader, optimizer, checkpointing |
+| M-4 | Dataset Pipeline | Crawl4AI + cleaning + dedup pipeline |
+| M-5 | Reasoning Dataset | Chain-of-thought, tool-use, agent-task data |
+| M-6 | Foundation V1 | 1B param model, basic reasoning |
+| M-7 | Foundation V2 | 3B param, RDT layers (OpenMythos-inspired) |
+| M-8 | Agent-Centric Training | Fine-tune on JARVIS agent interaction traces |
+| M-9 | Evaluation Framework | JARVIS-Bench: memory, planning, tool-use evals |
+| M-10 | Continuous Improvement | RLHF-lite loop using agent feedback |
+
+---
+
+## 12. Folder Structure
+
+```
+jarvis/
+├── core/
+│   ├── event_bus.py          # asyncio + Redis pub/sub
+│   ├── config.py             # centralized config loader
+│   ├── registry.py           # brain/agent plugin registry
+│   └── security_gateway.py   # HITL approval flow
+│
+├── brains/
+│   ├── executive/
+│   ├── research/
+│   ├── memory/
+│   │   ├── working.py
+│   │   ├── episodic.py
+│   │   ├── semantic.py
+│   │   ├── procedural.py
+│   │   └── knowledge_graph.py
+│   ├── learning/
+│   ├── computer/
+│   ├── voice/
+│   │   ├── wake_word.py
+│   │   ├── stt.py
+│   │   ├── tts.py
+│   │   └── vad.py
+│   ├── coding/
+│   ├── security/
+│   ├── planner/
+│   ├── critic/
+│   └── observer/
+│
+├── agents/
+│   ├── executive_agent.py
+│   ├── research_agent.py
+│   ├── planner_agent.py
+│   ├── coder_agent.py
+│   ├── memory_agent.py
+│   ├── critic_agent.py
+│   ├── security_agent.py
+│   ├── observer_agent.py
+│   ├── executor_agent.py
+│   └── learning_agent.py
+│
+├── orchestration/
+│   ├── graph.py              # LangGraph StateGraph definition
+│   ├── state.py              # JarvisState TypedDict
+│   └── router.py            # conditional edge logic
+│
+├── tools/
+│   ├── browser.py            # Page-Agent + Playwright wrapper
+│   ├── filesystem.py
+│   ├── shell.py              # sandboxed subprocess
+│   ├── search.py             # Crawl4AI + DuckDuckGo
+│   └── swarm.py              # MiroFish integration
+│
+├── memory_store/
+│   ├── qdrant_client.py
+│   ├── neo4j_client.py
+│   ├── sqlite_client.py
+│   └── redis_client.py
+│
+├── mythos/                   # MYTHOS model (future)
+│   ├── tokenizer/
+│   ├── model/
+│   ├── training/
+│   ├── dataset/
+│   └── evaluation/
+│
+├── improvements/             # Self-improvement branches
+│   └── .jarvisgit/
+│
+├── interfaces/
+│   ├── cli.py
+│   ├── web/                  # FastAPI + React dashboard
+│   └── voice_shell.py
+│
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── benchmarks/
+│
+├── data/
+│   ├── sqlite/
+│   └── logs/
+│
+├── docker/
+│   ├── neo4j/
+│   ├── qdrant/
+│   └── redis/
+│
+├── docker-compose.yml
+├── requirements.txt
+├── pyproject.toml
+└── README.md
+```
+
+---
+
+## 13. Dependency Graph
+
+```
+Phase 0 (Infrastructure)
+  └─► docker-compose (Neo4j + Qdrant + Redis)
+  └─► Ollama + local LLM pull
+
+Phase 1 (Core)
+  └─► event_bus ◄── all agents depend on this
+  └─► config + registry
+  └─► security_gateway
+
+Phase 2 (Memory)
+  └─► memory_store/* ◄── Memory Brain
+  └─► Memory Brain ◄── all other brains
+
+Phase 3 (Reasoning)
+  └─► Executive Brain + Planner Brain + Critic Brain
+  └─► LangGraph StateGraph
+
+Phase 4 (Capabilities)
+  └─► Research Brain (Crawl4AI)
+  └─► Computer Brain (PyAutoGUI + Playwright)
+  └─► Coding Brain (OpenHands)
+
+Phase 5 (Voice)
+  └─► openWakeWord → Whisper.cpp → MisoTTS
+
+Phase 6 (Self-Improvement)
+  └─► JarvisGit + benchmark suite
+
+Phase 7 (MYTHOS)
+  └─► PyTorch + SentencePiece + training pipeline
+```
+
+---
+
+## 14. Development Roadmap
+
+### Phase 0 — Infrastructure (Weeks 1–2)
+- [ ] Docker Compose: Neo4j + Qdrant + Redis
+- [ ] Ollama + Llama 3 8B pull
+- [ ] Project scaffold, pyproject.toml
+- [ ] CI/CD: pytest + pre-commit
+
+### Phase 1 — Core OS (Weeks 3–4)
+- [ ] Event bus (asyncio + Redis)
+- [ ] Config + plugin registry
+- [ ] Base Agent class + AgentMessage protocol
+- [ ] Security gateway (HITL flow)
+- [ ] Audit log (SQLite)
+
+### Phase 2 — Memory System (Weeks 5–7)
+- [ ] Working memory (Redis)
+- [ ] Episodic memory (SQLite + Qdrant embeddings)
+- [ ] Semantic memory (Qdrant collections)
+- [ ] Procedural memory (SQLite skills table)
+- [ ] Knowledge graph (Neo4j schema + client)
+- [ ] Memory Brain service (unified retrieval API)
+
+### Phase 3 — Executive Reasoning (Weeks 8–10)
+- [ ] LangGraph StateGraph skeleton
+- [ ] Executive Agent (goal decomposition)
+- [ ] Planner Agent (task graph)
+- [ ] Critic Agent (evaluation + revision loop)
+- [ ] Full 10-step reasoning loop
+
+### Phase 4 — Agent Council (Weeks 11–14)
+- [ ] Research Agent + Research Brain (Crawl4AI)
+- [ ] Memory Agent
+- [ ] Observer Agent + system monitoring
+- [ ] Security Agent + rule engine
+- [ ] Learning Agent (skill compilation)
+- [ ] Executor Agent
+
+### Phase 5 — Computer Control (Weeks 15–17)
+- [ ] Computer Brain (file, shell, process)
+- [ ] Browser control (Page-Agent + Playwright)
+- [ ] Sandboxed code execution
+- [ ] Coder Agent + OpenHands integration
+
+### Phase 6 — Voice System (Weeks 18–20)
+- [ ] openWakeWord integration ("hey jarvis")
+- [ ] Silero VAD pipeline
+- [ ] Whisper.cpp STT (pywhispercpp)
+- [ ] MisoTTS integration
+- [ ] Streaming voice conversation loop
+- [ ] Interrupt handling
+
+### Phase 7 — Self-Improvement (Weeks 21–23)
+- [ ] JarvisGit abstraction
+- [ ] Benchmark suite (JARVIS-Bench v0)
+- [ ] Prompt improvement workflow
+- [ ] Skill compilation from episodes
+- [ ] Approval-gated merge system
+
+### Phase 8 — Interfaces (Weeks 24–26)
+- [ ] CLI interface
+- [ ] FastAPI backend + React dashboard
+- [ ] Voice shell (standalone)
+- [ ] MiroFish scenario simulation
+
+### Phase 9 — MYTHOS (Months 7–18)
+- [ ] Tokenizer (M-1)
+- [ ] Mini transformer 125M (M-2)
+- [ ] Training pipeline (M-3 → M-4)
+- [ ] Foundation V1 → V2 (M-6 → M-7)
+- [ ] Agent-centric fine-tuning (M-8)
+
+---
+
+## 15. Risk Assessment
+
+| Risk | Severity | Probability | Mitigation |
+|------|----------|-------------|------------|
+| Hardware insufficient for MYTHOS training | HIGH | HIGH | Use LoRA fine-tuning on existing SLM; defer pretraining |
+| Agent coordination deadlocks | HIGH | MEDIUM | LangGraph timeout + circuit breakers |
+| Self-improvement introduces regressions | HIGH | MEDIUM | Branch-test-benchmark gate; never auto-merge |
+| Memory inconsistency (Neo4j / Qdrant drift) | MEDIUM | MEDIUM | Sync validator runs hourly |
+| Whisper.cpp latency unacceptable | MEDIUM | LOW | Fall back to faster-whisper or Vosk |
+| Neo4j Community Edition limits | LOW | LOW | FalkorDB is a drop-in alternative |
+| OpenMythos RDT instability | MEDIUM | HIGH | Use standard GPT-2 architecture for MYTHOS V1 |
+| DESi integration unclear | HIGH | HIGH | Remove DESi; replaced by OpenHands |
+| Voice model MisoTTS hardware req. | MEDIUM | MEDIUM | Fall back to Piper TTS (much lighter) |
+| Scope creep stalling Phase 1 | HIGH | HIGH | Strict phase gates; no Phase N+1 until N tests pass |
+
+---
+
+## 16. Hardware Recommendations
+
+| Component | Minimum | Recommended |
+|-----------|---------|-------------|
+| CPU | 8-core | 16-core (Ryzen 9 / i9) |
+| RAM | 32 GB | 64 GB |
+| GPU (inference) | RTX 3060 12 GB | RTX 4080 16 GB |
+| GPU (MYTHOS training) | RTX 4090 24 GB | 2× A100 80 GB |
+| Storage | 1 TB SSD | 2 TB NVMe |
+| OS | Ubuntu 22.04 / Windows 11 WSL2 | Ubuntu 22.04 LTS |
+
+---
+
+## 17. Testing Strategy
+
+- **Unit tests**: every Brain service method (pytest + mocks)
+- **Integration tests**: agent communication, memory persistence
+- **Benchmark suite (JARVIS-Bench)**: 
+  - Memory recall accuracy
+  - Goal completion rate
+  - Planning quality score
+  - Voice latency (wake → response)
+  - Self-improvement regression detection
+- **Security tests**: action validation, bypass attempts
+- **Chaos tests**: random brain failure recovery
+
+---
+
+## 18. Open Questions for User Review
+
+> [!IMPORTANT]
+> Please confirm these before implementation begins.
+
+1. **DESi** — Confirm intended library. Replace with OpenHands?
+2. **Primary LLM** — Which local model to start with? (Llama 3 8B / Mistral 7B / Qwen 2.5 14B)
+3. **Hardware spec** — What GPU/RAM is available? This determines MYTHOS feasibility.
+4. **Voice language** — English only, or multilingual?
+5. **Phase priority** — Should Voice (Phase 6) come before Computer Control (Phase 5)?
+6. **HITL preference** — Should destructive actions auto-approve in dev mode?
+7. **Existing code** — The open file `renderer.js` suggests an Electron-based assistant. Should JARVIS integrate with or replace this?
+
+---
+
+*This plan is a living document. Once approved, a `task.md` will be created to track implementation progress phase by phase.*

@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+
+# Environment
+.env.local
+*.env.prod
+
+# Data (not tracked in git — too large / sensitive)
+data/sqlite/*.db
+data/logs/
+data/vector_cache/
+
+# Models (too large)
+mythos/training/checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
