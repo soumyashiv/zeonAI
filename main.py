@@ -242,4 +242,9 @@ async def run_cli() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(run_cli())
+    if "--voice" in sys.argv:
+        # Voice shell mode
+        from interfaces.voice_shell import run_voice_loop
+        asyncio.run(run_voice_loop())
+    else:
+        asyncio.run(run_cli())
