@@ -9,62 +9,136 @@
 ## Architecture
 
 ```
-Executive Brain → Planner → Critic → Agent Council → Brain Services → Memory
-     ↑                                                                    ↓
-   Voice ←←←←←←←←← Computer Control ←←←←←←← Learning ←←←←←← Neo4j/Qdrant
+  ┌─────────────────────────────────────────────────────────┐
+  │                    JARVIS OS v0.1.0                     │
+  ├──────────────┬──────────────┬──────────────────────────-┤
+  │  Voice Shell │   CLI / Web  │     Event Bus             │
+  ├──────────────┴──────────────┴───────────────────────────┤
+  │            LangGraph Executive Reasoning Loop            │
+  │  Observe→Understand→Research→Plan→Critique→Execute      │
+  ├──────────┬──────────┬───────────┬────────────────────---┤
+  │Executive │ Planner  │  Critic   │ Research │ Coder      │
+  │  Agent   │  Agent   │  Agent    │  Agent   │ Agent      │
+  ├──────────┴──────────┴───────────┴──────────┴────────────┤
+  │                 5-Tier Memory System                     │
+  │  Working│Episodic│Semantic(Qdrant)│Skills│Graph(Neo4j)  │
+  └─────────────────────────────────────────────────────────┘
 ```
 
-## Current Phase
+---
 
-**Phase 0 — Core Infrastructure** ✅
-- Event bus, audit log, security gateway, base agent, LLM backend
+## Status
 
-**Next:** Phase 1 (Memory System), Phase 2 (Executive Reasoning)
+| Phase | Description | Status |
+|-------|-------------|--------|
+| 0 — Infrastructure | Config, event bus, audit log, security, LLM | ✅ Complete |
+| 1 — Core OS | 9 agents, base reasoning loop, registry | ✅ Complete |
+| 2 — Memory System | 5-tier memory + MemoryBrain unified API | ✅ Complete |
+| 3 — Executive Reasoning | LangGraph 10-node graph, router, search | ✅ Complete |
+| **4 — Voice System** | **Wake word → VAD → STT → TTS (EN/HI)** | **🔄 In Progress** |
+| 5 — Agent Council | Multi-agent debates, consensus | ⏳ Planned |
+| 6 — Computer Control | pyautogui, browser, file system | ⏳ Planned |
+| 7 — Self-Improvement | Skill compilation, MYTHOS prep | ⏳ Planned |
+| 8 — UI Interfaces | Web dashboard, voice HUD | ⏳ Planned |
+| 9 — MYTHOS Model | Custom LLM (needs GPU) | ⏳ Deferred |
+
+**Tests:** 49/49 passing · **LLM:** gemma4:latest (Ollama) · **Python:** 3.13
+
+---
 
 ## Quick Start
 
 ```bash
-# 1. Start Ollama (required)
+# 1. Start Ollama
 ollama serve
 
-# 2. Configure environment
-cp .env .env.local  # edit as needed
-
-# 3. Run JARVIS
+# 2. Run JARVIS CLI
 python main.py
+
+# 3. Commands
+jarvis> ask What is machine learning?
+jarvis> memory stats
+jarvis> system status
+jarvis> graph test
+```
+
+## Voice Mode (Phase 4 — in progress)
+
+```bash
+# Install voice dependencies
+pip install openwakeword webrtcvad faster-whisper
+
+# Start with voice enabled
+python main.py --voice
+
+# Say: "Hey JARVIS, what is the weather today?"
 ```
 
 ## Register local Qwen3.5-9B model
 
 ```bash
 ollama create qwen3.5-9b -f config/Modelfile.qwen35
-# Then update .env: JARVIS_LLM_MODEL=qwen3.5-9b
+# Then: JARVIS_LLM_MODEL=qwen3.5-9b in .env
 ```
 
 ## Run Tests
 
 ```bash
 python -m pytest tests/ -v
+# Expected: 49 passed
 ```
+
+---
 
 ## Hardware
 
-- CPU: AMD Ryzen 7 5700U (8 cores)
-- RAM: 16 GB
-- GPU: Integrated (CPU inference via Ollama)
-- Primary LLM: gemma4:latest / Qwen3.5-9B-Q6_K
+| Component | Spec |
+|-----------|------|
+| CPU | AMD Ryzen 7 5700U (8 cores @ 4.3 GHz) |
+| RAM | 16 GB DDR4 |
+| GPU | Integrated Radeon (CPU inference via Ollama) |
+| Storage | 512 GB NVMe |
+| LLM | gemma4:latest (9.6 GB) / Qwen3.5-9B-Q6_K |
+| Embeddings | all-MiniLM-L6-v2 (384-dim, CPU) |
 
-## Roadmap
+---
 
-| Phase | Status |
-|-------|--------|
-| 0 — Core Infrastructure | ✅ Complete |
-| 1 — Core OS (event bus, agents) | ✅ Complete |
-| 2 — Memory System | 🔄 Next |
-| 3 — Executive Reasoning | ⏳ Planned |
-| 4 — Agent Council | ⏳ Planned |
-| 5 — Voice System | ⏳ Planned |
-| 6 — Computer Control | ⏳ Planned |
-| 7 — Self-Improvement | ⏳ Planned |
-| 8 — Interfaces | ⏳ Planned |
-| 9 — MYTHOS Model | ⏳ Deferred (needs GPU) |
+## Project Structure
+
+```
+Zeon/
+├── agents/          ← 9 autonomous agents
+│   ├── executive_agent.py
+│   ├── planner_agent.py
+│   ├── critic_agent.py
+│   ├── executor_agent.py
+│   ├── coder_agent.py
+│   ├── research_agent.py
+│   ├── memory_agent.py
+│   ├── observer_agent.py
+│   └── self_improvement_agent.py
+├── brains/
+│   └── memory/      ← 5-tier memory system
+│       ├── working.py         # TTL in-process
+│       ├── episodic.py        # SQLite experience log
+│       ├── semantic.py        # Qdrant vector store
+│       ├── procedural.py      # Skills registry
+│       ├── knowledge_graph.py # Neo4j / NetworkX
+│       └── __init__.py        # MemoryBrain unified API
+├── core/            ← infrastructure
+│   ├── config.py    event_bus.py   audit_log.py
+│   ├── llm.py       security_gateway.py   registry.py
+├── orchestration/   ← LangGraph
+│   ├── graph.py     state.py     router.py
+├── tools/
+│   └── search.py    ← DuckDuckGo + Crawl4AI
+├── interfaces/      ← CLI, Voice (Phase 4), Web (Phase 8)
+├── tests/unit/      ← 49 tests
+└── main.py          ← entry point
+```
+
+---
+
+## GitHub
+
+[github.com/soumyashiv/zeonAI](https://github.com/soumyashiv/zeonAI)
